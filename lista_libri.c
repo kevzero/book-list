@@ -2,6 +2,7 @@
 #include <string.h>
 
 #define N 50
+#define FILENAME "library_data.txt"
 
 typedef struct {
     char id[40];
@@ -9,19 +10,13 @@ typedef struct {
     char genre[40];  
 } book;
 
-book library[N] = { 
-    {"32-45435-1223-4", "The Name of the Rose", "novel"},
-    {"78-674-5435-1223-4", "The C Programming Language", "computer science"},
-    {"6-7887-6-8435-12234", "The C++ Programming Language", "computer science"},
-    {"324-5-435-1234", "Java", "computer science"},
-};
-
-int my_index = 4; // Indicates the number of elements allocated in the library array
+book library[N];
+int my_index = 0;
 
 void printBooks(int position)
 { 
     int i = 0;
-    while(i < position)
+    while (i < position)
     {	
         printf("\n\nBook Code: %s", library[i].id);
         printf("\nTitle: %s", library[i].title);
@@ -35,22 +30,20 @@ int insertBook(int position)
 {
     char enter;
     
-    if(position >= N) {
+    if (position >= N) {
         printf("\n\nYou have reached the maximum limit of books you can insert.");
         
+        getchar(); // Consumes the newline character in the buffer
         scanf("%c", &enter);
         return position;
     }
     
-    fflush(stdin);
     printf("\nISBN:");
-    gets(library[position].id);
-    fflush(stdin);	
+    scanf("%s", library[position].id);
     printf("\nTitle:");
-    gets(library[position].title);
+    scanf(" %[^\n]s", library[position].title); // Reads a whole line as title
     printf("\nGenre:");
-    gets(library[position].genre);
-    fflush(stdin);
+    scanf(" %[^\n]s", library[position].genre); // Reads a whole line as genre
     
     position++;
     return position;
@@ -65,7 +58,7 @@ void printGenre(int position)
     scanf("%s", genre);
     
     for (i = 0; i < position; i++){
-        if(strcmp(library[i].genre, genre) == 0) {
+        if (strcmp(library[i].genre, genre) == 0) {
             printf("\n\n ISBN: %s ", library[i].id);
             printf("\n Title: %s ", library[i].title);
             found = 1;
@@ -93,23 +86,65 @@ int menuChoice(void)
     return selection;
 }
 
+void saveLibraryToFile()
+{
+    FILE *file = fopen(FILENAME, "w");
+    
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return;
+    }
+    
+    for (int i = 0; i < my_index; i++) {
+        fprintf(file, "%s;%s;%s\n", library[i].id, library[i].title, library[i].genre);
+    }
+    
+    fclose(file);
+}
+
+void loadLibraryFromFile()
+{
+    FILE *file = fopen(FILENAME, "r");
+    
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        return;
+    }
+    
+    while (fscanf(file, "%[^;];%[^;];%[^\n]\n", library[my_index].id, library[my_index].title, library[my_index].genre) == 3) {
+        my_index++;
+        if (my_index >= N) {
+            printf("Warning: Too many books in the file. Some may not be loaded.\n");
+            break;
+        }
+    }
+    
+    fclose(file);
+}
+
 int main(void)
 {
+    loadLibraryFromFile();
+    
     int choice;
     
-    while((choice = menuChoice()) != 4) {
-        switch(choice) {
+    while ((choice = menuChoice()) != 4) {
+        switch (choice) {
             case 1: 
                 printBooks(my_index);
                 break;
             case 2:
                 my_index = insertBook(my_index);
+                saveLibraryToFile();
                 break;
             case 3:
                 printGenre(my_index);
                 break;
             case 4: break;
         }
-    }             
+    }
+    
+    saveLibraryToFile();
+    
     return 0;
 }
