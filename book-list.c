@@ -7,6 +7,7 @@
 typedef struct {
     char id[40];
     char title[150];
+    char author[100];
     char genre[40];  
 } book;
 
@@ -20,6 +21,7 @@ void printBooks(int position)
     {	
         printf("\n\nBook Code: %s", library[i].id);
         printf("\nTitle: %s", library[i].title);
+        printf("\nAuthor: %s", library[i].author);
         printf("\nGenre: %s", library[i].genre);
 
         i++;
@@ -42,6 +44,8 @@ int insertBook(int position)
     scanf("%s", library[position].id);
     printf("\nTitle:");
     scanf(" %[^\n]s", library[position].title); // Reads a whole line as title
+    printf("\nAuthor:");
+    scanf(" %[^\n]s", library[position].author); // Reads a whole line as author
     printf("\nGenre:");
     scanf(" %[^\n]s", library[position].genre); // Reads a whole line as genre
     
@@ -49,23 +53,25 @@ int insertBook(int position)
     return position;
 }
 
-void printGenre(int position)
+void printAuthor(int position)
 { 
-    char genre[40];
+    char author[100];
     int i = 0, found = 0;
     
-    printf("\nWhich genre are you looking for?:");
-    scanf("%s", genre);
+    printf("\nWhich author are you looking for?:");
+    scanf(" %[^\n]s", author);
     
     for (i = 0; i < position; i++){
-        if (strcmp(library[i].genre, genre) == 0) {
+        if (strcmp(library[i].author, author) == 0) {
             printf("\n\n ISBN: %s ", library[i].id);
             printf("\n Title: %s ", library[i].title);
+            printf("\n Author: %s ", library[i].author);
+            printf("\n Genre: %s", library[i].genre);
             found = 1;
         }
     }
     if (found == 0) 
-        printf("\nNo books in this category.");
+        printf("\nNo books by this author.");
 }
 
 int menuChoice(void)
@@ -76,7 +82,7 @@ int menuChoice(void)
         printf("\n" );
         printf("\n1 - Print available books" );
         printf("\n2 - Insert a book");
-        printf("\n3 - Search for books by genre");
+        printf("\n3 - Search for books by author");
         printf("\n4 - Exit");
         printf("\n" );
         printf("\nMake a choice: " );
@@ -96,7 +102,7 @@ void saveLibraryToFile()
     }
     
     for (int i = 0; i < my_index; i++) {
-        fprintf(file, "%s;%s;%s\n", library[i].id, library[i].title, library[i].genre);
+        fprintf(file, "%s;%s;%s;%s\n", library[i].id, library[i].title, library[i].author, library[i].genre);
     }
     
     fclose(file);
@@ -111,7 +117,7 @@ void loadLibraryFromFile()
         return;
     }
     
-    while (fscanf(file, "%[^;];%[^;];%[^\n]\n", library[my_index].id, library[my_index].title, library[my_index].genre) == 3) {
+    while (fscanf(file, "%[^;];%[^;];%[^;];%[^\n]\n", library[my_index].id, library[my_index].title, library[my_index].author, library[my_index].genre) == 4) {
         my_index++;
         if (my_index >= N) {
             printf("Warning: Too many books in the file. Some may not be loaded.\n");
@@ -138,7 +144,7 @@ int main(void)
                 saveLibraryToFile();
                 break;
             case 3:
-                printGenre(my_index);
+                printAuthor(my_index);
                 break;
             case 4: break;
         }
@@ -148,3 +154,4 @@ int main(void)
     
     return 0;
 }
+
